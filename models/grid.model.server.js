@@ -1,15 +1,22 @@
-var Tile = require("./tile.model.server.js");
+var Tile = require("./tile.model.server");
+var TileDA = require("./../da/tile.da.server");
+var tileDA = new TileDA();
+var GridDA = require("./../da/grid.da.server");
+var gridDA = new GridDA();
+var uuid = require("uuid");
 
-var Grid = function(data) {
+var Grid = function() {
 	var tiles[];
-	
-	var rowDim = data.rowDim || 3;
-	var colDim = data.colDim || 3;
-
 	var emptyTile;
+	var id;
 
-	var init = function() {
-		var availableLabels = [ "1", "2", "3", "4", "5", "6", "7", "8" ];
+	var init = function(data) {
+		var id = uuid.v1();
+		var rowDim = data.rowDim || 3;
+		var colDim = data.colDim || 3;
+
+		var availableLabels = data.availableLabels || [ "1", "2", "3", "4", "5", "6", "7", "8" ];
+
 		for(var i=0; i < rowDim; i++) {
 			for(var j=0; j<colDim; j++) {
 				var tile;
@@ -38,8 +45,22 @@ var Grid = function(data) {
 		this.emptyTile.colPos = tempColPos;
 	}
 
-	var getState = function() {
+	var save = function() {
+		GridDA.save(this);
 		
+	}
+
+	var load = function(id) {
+		gridDA.getTileIds()
+			.then(function(tileIds) {
+				var promises = tileIds.map(function(tileId) {
+					return tileDA.loadTile(id);
+				})
+			})
+		// gridDA.getTileIds(gridId)
+		// TileDA.getTilesForGrid(gridUuid);
+		// add tiles to this.tiles
+		// add empty tile to this.emptyTile
 	}
 
 	return {
