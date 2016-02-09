@@ -10,12 +10,16 @@ var GridSchema = new Schema({
 var gridModel = mongoose.model('Grid', GridSchema);
 
 var GridDA = function() {
+	var self = this;
+
+	var gridCache = new Array();
+
 	var save = function(grid) {
 		return new Promise(function(resolve, reject) {
 			gridModel.findOne({ gridId: grid.gridId }).exec(function(err,doc) {
 				if(err) {
 					reject(err);
-					return
+					return;
 				}
 				if(doc) {
 					var promises = grid.tiles.map(function(tile) {
@@ -41,6 +45,7 @@ var GridDA = function() {
 								if(err) {
 									reject(err);
 								} else {
+									self.gridCache.push(newGrid);
 									resolve(newGrid);
 								}
 							});		
@@ -51,33 +56,47 @@ var GridDA = function() {
 				}
 			})
 		});
-	}
+	};
 
 	var load = function(gridId) {
+		var self = this;
+		
 		return new Promise(function(resolve, reject) {
-			gridModel.findOne({ gridId: gridId }).exec(function(err,doc) {
+			var cachedGrid = self.gridCache.find(function(aGrid) {
+				return aGrid.gridId === gridId;
+			});
+			if(cachedGrid) {
+				resolve(cachedGrid);
+			} else {
+				gridModel.findOne({ gridId: gridId }).exec(function(err,doc) {
+					if(err) {
+						reject(err);
+						return;
+					}
+					if(doc) {
+						self.gridCache.push(doc);
+						resolve(doc);
+					} else {
+						reject("No grid found with that id.");
+					}
+				});
+			}
+		});
+	};
+
+	var loadMultiple = function() {
+		var self = this;
+
+		return new Promise(function(resolve, reject) {
+			gridModel.find().exec(function(err,docs) {
 				if(err) {
 					reject(err);
 					return;
-				}
-				if(doc) {
-					resolve(doc);
-				} else {
-					reject("No grid found with that id.");
-				}
-			})
-
-		});
-	}
-
-	var getTileIds = function(gridId) {
-		return new Promise(function(resolve,reject) {
-			GridMongooseModel.find({ gridId: gridId }).exec(function(err, grid) {
-				if(err) {
-					reject(err);
-				} else {
-					resolve(grid.tileIds);
-				}
+				} 
+				docs.forEach(function(doc) {
+					self.gridCache.push(doc);
+				});
+				resolve(docs);
 			});
 		});
 	}
@@ -85,9 +104,10 @@ var GridDA = function() {
 	return {
 		save: save,
 		load: load,
-		getTileIds: getTileIds
+		loadMultiple: loadMultiple,
+		gridCache: gridCache
 	}
 }
 
 // DA should be a sigleton.
-modules.exports = GridDA();
+module.exports = new GridDA();

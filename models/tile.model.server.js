@@ -1,5 +1,6 @@
 var uuid = require('uuid');
-var TileDA = require('../da/tile.da.server')();
+/*var TileDA = require('../da/tile.da.server')();*/
+var daFactory = require('../da/daFactory.da.server');
 
 var Tile = function() {
 	var tileId;
@@ -34,7 +35,7 @@ var Tile = function() {
 
 	var load = function(id) {
 		var self = this;
-		return TileDA.load(id)
+		return daFactory.tile.load(id)
 			.then(function(tileData) {
 				self.tileId = tileData.tileId;
 				self.rowPos = tileData.rowPos;
@@ -49,7 +50,7 @@ var Tile = function() {
 	}
 
 	var save = function() {
-		TileDA.save(this);
+		daFactory.tile.save(this);
 	}
 
 	return {

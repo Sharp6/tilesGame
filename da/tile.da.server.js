@@ -15,11 +15,11 @@ var TileSchema = new Schema({
 var tileModel = mongoose.model('Tile', TileSchema);
 
 var TileDA = function() {
+	var self = this;
 
 	// Implement a cache
-	var tileCache = [];
+	this.tileCache = new Array();
 
-	// TODO: should save refresh the data in cache?
 	var save = function(tile) {
 		return new Promise(function(resolve,reject) {
 			tileModel.findOne({ tileId: tile.tileId }).exec(function(err, doc) {
@@ -35,6 +35,14 @@ var TileDA = function() {
 						if(err) {
 							reject(err);
 						} else {
+							// Add saved tile to cache
+							var cachedTileIndex = self.tileCache.findIndex(function(aTile) {
+								return aTile.tileId === tileId;
+							});
+							if(cachedTileIndex > -1) {
+								self.tileCache.splice(cachedTileIndex,1);
+								self.tileCache.push(doc);
+							}
 							resolve(doc);
 						}
 					});
@@ -55,6 +63,7 @@ var TileDA = function() {
 						if(err) {
 							reject(err);
 						} else {
+							self.tileCache.push(newTile);
 							resolve(newTile);
 						}
 					});
@@ -63,21 +72,28 @@ var TileDA = function() {
 		});
 	}
 
-	// TODO: load should first search the cache, only then talk to DB.
-	// TODO: if talking to DB, it should be stored in the cache.
 	var load = function(tileId) {
 		return new Promise(function(resolve,reject) {
-			tileModel.findOne({ tileId: tileId }).exec(function(err,doc) {
-				if(err) {
-					reject(err);
-					return;
-				}
-				if(doc) {
-					resolve(doc);
-				} else {
-					reject("No tile found with that id.");
-				}
+			var cachedTile = self.tileCache.find(function(aTile) {
+				return aTile.tileId === tileId;
 			});
+
+			if(cachedTile) {
+				resolve(cachedTile);
+			} else {
+				tileModel.findOne({ tileId: tileId }).exec(function(err,doc) {
+					if(err) {
+						reject(err);
+						return;
+					}
+					if(doc) {
+						self.tileCache.push(doc);
+						resolve(doc);
+					} else {
+						reject("No tile found with that id.");
+					}
+				});
+			}
 		});
 	}
 

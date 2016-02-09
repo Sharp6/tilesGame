@@ -1,6 +1,9 @@
 var Tile = require("./tile.model.server");
+/*
 var GridDA = require("./../da/grid.da.server");
 var gridDA = new GridDA();
+*/
+var daFactory = require('../da/daFactory.da.server');
 var uuid = require("uuid");
 
 var Grid = function() {
@@ -47,7 +50,6 @@ var Grid = function() {
 
 		for(var i=0; i < this.rowDim; i++) {
 			for(var j=0; j< this.colDim; j++) {
-				console.log("Creating a tile");
 				var tile;
 				if((i!==this.rowDim-1) || (j!==this.colDim-1)) {
 					tile = new Tile();
@@ -60,19 +62,17 @@ var Grid = function() {
 				this.tiles.push(tile);
 			}
 		}
-		console.log("Saving the grid.");
 		this.save();
 	}
 
 	var save = function() {
-		gridDA.save(this);
+		daFactory.grid.save(this);
 	}
 
 	var load = function(id) {
 		var self = this;
-		return gridDA.load(id)
+		return daFactory.grid.load(id)
 			.then(function(gridData) {
-				console.log(gridData);
 				self.gridId = gridData.gridId;
 				self.rowDim = gridData.rowDim;
 				self.colDim = gridData.colDim;
@@ -84,8 +84,10 @@ var Grid = function() {
 				return Promise.all(promises);
 			})
 			.then(function(tiles) {
-				console.log("All tiles have been added.");
-				// TODO add empty tile to this.emptyTile
+				self.emptyTile = self.tiles.find(function(aTile) {
+					return aTile.empty;
+				});
+				return self;
 			});
 	}
 

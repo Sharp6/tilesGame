@@ -32,10 +32,14 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 var commandRoutes = require("./routes/commands.routes.server");
+var gridRoutes = require("./routes/grid.routes.server");
+var adminRoutes = require("./routes/admin.routes.server");
 
 app.use('/', routes);
 app.use('/users', users);
 app.use('/commands', commandRoutes);
+app.use('/api', gridRoutes);
+app.use('/admin', adminRoutes);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

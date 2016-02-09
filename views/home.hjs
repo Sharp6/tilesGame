@@ -1,0 +1,40 @@
+<html>
+
+<head>
+	<link href="/stylesheets/style.css" rel="stylesheet" media="screen" type="text/css">
+
+</head>
+
+<body>
+	<h1>Hello Admin!</h1>
+	<table>
+		<thead>
+			<td>Grid ID</td>
+			<td>Dimensions</td>
+			<td>State</td>
+		</thead>
+		<tbody>
+			{{#grids}}
+				<tr>
+					<td>
+						{{gridId}}
+					</td>
+					<td>
+						{{rowDim}} x {{colDim}}
+					</td>
+					<td>
+						<div class="grid-container">
+							{{#tiles}}
+								<div class="cell row{{rowPos}} col{{colPos}}">
+									<span>{{label}}</span>
+								</div>
+							{{/tiles}}
+						</div>
+					</td>
+				</tr>
+			{{/grids}}
+		</tbody>
+	</table>
+
+</body>
+</html>
