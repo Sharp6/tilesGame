@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 
-var commandController = require('./controllers/command.controller.server');
+var commandController = require('./../controllers/command.controller.server')();
 
 /* GET home page. */
 router.get('/move', function(req, res) {
