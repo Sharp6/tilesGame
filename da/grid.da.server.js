@@ -22,4 +22,5 @@ var GridDA = function() {
 	}
 }
 
-modules.exports = GridDA;
+// DA should be a sigleton.
+modules.exports = GridDA();
