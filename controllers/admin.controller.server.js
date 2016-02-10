@@ -8,6 +8,7 @@ var AdminController = function() {
 				res.render('home', {grids: grids});		
 			})
 			.catch(function(err) {
+				console.log(err);
 				res.status(500).send(err);
 			});		
 	}

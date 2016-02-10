@@ -15,6 +15,7 @@ var GridDA = function() {
 	var gridCache = new Array();
 
 	var save = function(grid) {
+		var self = this;
 		return new Promise(function(resolve, reject) {
 			gridModel.findOne({ gridId: grid.gridId }).exec(function(err,doc) {
 				if(err) {

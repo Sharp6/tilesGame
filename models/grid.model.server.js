@@ -8,6 +8,7 @@ var uuid = require("uuid");
 
 var Grid = function() {
 	var tiles = new Array();
+	var moves = new Array();
 	var emptyTile;
 	var gridId;
 	var rowDim;
@@ -35,25 +36,47 @@ var Grid = function() {
 		var tempColPos = tile.colPos();
 		tile.colPos = this.emptyTile.colPos;
 		this.emptyTile.colPos = tempColPos;
+
+		return true;
 	}
 
 	var init = function(data) {
-		this.gridId = uuid.v1();
-		this.rowDim = data.rowDim || 3;
-		this.colDim = data.colDim || 3;
+		var self = this;
+		function getRowGoal(label) {
+			var labelIndex = originalLabels.indexOf(label);
+			if(labelIndex > -1) {
+				return Math.floor(labelIndex / self.rowDim);
+			} else {
+				return undefined;
+			}			
+		}
+
+		function getColGoal(label) {
+			var labelIndex = originalLabels.indexOf(label);
+			if(labelIndex > -1) {
+				return labelIndex % self.colDim;
+			} else {
+				return undefined;
+			}	
+		}
 
 		var getRandomInt = function(max) {
 		  return Math.floor(Math.random() * max);
 		}
 
+		this.gridId = uuid.v1();
+		this.rowDim = data.rowDim || 3;
+		this.colDim = data.colDim || 3;
 		var availableLabels = data.availableLabels || [ "1", "2", "3", "4", "5", "6", "7", "8" ];
+		var originalLabels = availableLabels.slice();
 
 		for(var i=0; i < this.rowDim; i++) {
 			for(var j=0; j< this.colDim; j++) {
 				var tile;
+				var randomIndex = getRandomInt(availableLabels.length);
 				if((i!==this.rowDim-1) || (j!==this.colDim-1)) {
 					tile = new Tile();
-					tile.init({rowInit:i, colInit:j, rowGoal:i, colGoal:j, label: availableLabels.splice(getRandomInt(availableLabels.length),1)[0]});	
+					tile.init({rowInit:i, colInit:j, rowGoal:getRowGoal(availableLabels[randomIndex]), colGoal:getColGoal(availableLabels[randomIndex]), label: availableLabels.splice(randomIndex,1)[0]});	
 				} else {
 					tile = new Tile();
 					tile.init({rowInit: i, colInit: j, rowGoal: i, colGoal: j, label: "", empty: true});
@@ -65,8 +88,20 @@ var Grid = function() {
 		this.save();
 	}
 
+	var execute = function(name) {
+		var args = Array.prototype.slice.call(arguments,1);
+		if(name === "move") {
+			this.moves.push({
+				name: name,
+				tile: args[0]
+			});
+			return this[name].apply(this, args);
+		}
+		return false;
+	}
+
 	var save = function() {
-		daFactory.grid.save(this);
+		return daFactory.grid.save(this);
 	}
 
 	var load = function(id) {

@@ -12,6 +12,8 @@
 			<td>Grid ID</td>
 			<td>Dimensions</td>
 			<td>State</td>
+			<td>Initial state</td>
+			<td>Goal state</td>
 		</thead>
 		<tbody>
 			{{#grids}}
@@ -26,6 +28,24 @@
 						<div class="grid-container">
 							{{#tiles}}
 								<div class="cell row{{rowPos}} col{{colPos}}">
+									<span>{{label}}</span>
+								</div>
+							{{/tiles}}
+						</div>
+					</td>
+					<td>
+						<div class="grid-container">
+							{{#tiles}}
+								<div class="cell row{{rowInit}} col{{colInit}}">
+									<span>{{label}}</span>
+								</div>
+							{{/tiles}}
+						</div>
+					</td>
+					<td>
+						<div class="grid-container">
+							{{#tiles}}
+								<div class="cell row{{rowGoal}} col{{colGoal}}">
 									<span>{{label}}</span>
 								</div>
 							{{/tiles}}

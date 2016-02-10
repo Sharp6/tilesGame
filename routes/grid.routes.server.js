@@ -8,4 +8,8 @@ router.get('/grids', function(req, res) {
   return gridController.getGrids(req,res);
 });
 
+router.get('/actions/createGrid', function(req,res) {
+	return gridController.createGrid(req,res);
+});
+
 module.exports = router;
