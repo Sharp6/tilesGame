@@ -1,4 +1,5 @@
 var Tile = require("./tile.model.server");
+var Command = require('./command.model.server');
 
 var daFactory = require('../da/daFactory.da.server');
 var repoFactory = require('../repositories/repositoryFactory.repository.server');
@@ -83,10 +84,16 @@ var Grid = function() {
 	var execute = function(name) {
 		var args = Array.prototype.slice.call(arguments,1);
 		if(name === "move") {
-			this.moves.push({
+			var newCommand = new Command();
+			newCommand.init({
 				name: name,
-				tile: args[0]
+				tile: args[0],
+				gridId: this.gridId
 			});
+			console.log("Pushing command to array");
+			this.moves.push(newCommand);
+			console.log("Saving command!");
+			newCommand.save();
 			return this[name].apply(this, args);
 		}
 		return false;

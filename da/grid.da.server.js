@@ -1,10 +1,12 @@
 var mongoose = require("mongoose");
+
 var Schema = mongoose.Schema;
 var GridSchema = new Schema({
 	gridId: String,
 	rowDim: Number, 
 	colDim: Number,
-	tileIds: [ String ]
+	tileIds: [ String ],
+	moveIds: [ String ]
 });
 
 var gridModel = mongoose.model('Grid', GridSchema);
@@ -21,6 +23,11 @@ var GridDA = function() {
 					return;
 				}
 				if(doc) {
+					var moveIds = grid.moves.map(function(move) {
+						return move.commandId;
+					});
+					doc.moveIds = moveIds;
+					doc.save();
 					var promises = grid.tiles.map(function(tile) {
 						return tile.save();
 					});
