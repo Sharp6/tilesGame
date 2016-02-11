@@ -58,10 +58,18 @@ var GridController = function() {
 				if(tileToMove) {
 					if(grid.isLegalMove(tileToMove)) {
 						grid.execute("move", tileToMove);
-						res.send("Tile has been moved");
+						var answer = {
+							resultStatus: 'success',
+							grid: grid
+						}
+						res.send(answer);
 						return grid;
 					} else {
-						res.send("Tile is not in a movable position.");
+						var answer = {
+							resultStatus: "Tile is not in a movable position.",
+							grid: grid
+						}
+						res.send(answer);
 						return false;
 					}
 				} else {

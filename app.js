@@ -38,6 +38,15 @@ if(app.get('env') === "development") {
   console.log("Loading dotEnv.");
 }
 
+var allowCrossDomain = function(req, res, next) {
+    res.header('Access-Control-Allow-Origin', '*');
+    //res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+
+    next();
+}
+
+
 // Mongoose ODM
 var mongoose = require('mongoose');
 mongoose.connect(process.env.MONGO_CONNECT_STRING);
@@ -52,6 +61,7 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(allowCrossDomain);
 app.use(express.static(path.join(__dirname, 'public')));
 
 var commandRoutes = require("./routes/commands.routes.server");

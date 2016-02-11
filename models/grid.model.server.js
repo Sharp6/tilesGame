@@ -14,17 +14,10 @@ var Grid = function() {
 	var colDim;
 
 	var isLegalMove = function(tile) {
-		return (
-			(
-				(Math.abs(tile.rowPos - this.emptyTile.rowPos == 1) 
-					&& (Math.abs(tile.colPos() - this.emptyTile.colPos()) == 0)) 
-				|| (
-					(Math.abs(tile.rowPos - this.emptyTile.rowPos == 0) 
-						&& (Math.abs(tile.colPos - this.emptyTile.colPos) == 1)
-						)
-					)
-				)
-			);
+		return ((Math.abs(tile.rowPos - this.emptyTile.rowPos) == 1) 
+					&& (Math.abs(tile.colPos - this.emptyTile.colPos) == 0)) 
+				|| ((Math.abs(tile.rowPos - this.emptyTile.rowPos) == 0) 
+						&& (Math.abs(tile.colPos - this.emptyTile.colPos) == 1));
 	}
 
 	var move = function(tile) {
