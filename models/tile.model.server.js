@@ -46,6 +46,8 @@ var Tile = function() {
 				self.colGoal = tileData.colGoal;
 				self.label = tileData.label;
 				self.empty = tileData.empty;
+
+				return self;
 			});
 	}
 

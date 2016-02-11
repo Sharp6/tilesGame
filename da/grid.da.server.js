@@ -12,8 +12,6 @@ var gridModel = mongoose.model('Grid', GridSchema);
 var GridDA = function() {
 	var self = this;
 
-	var gridCache = new Array();
-
 	var save = function(grid) {
 		var self = this;
 		return new Promise(function(resolve, reject) {
@@ -46,7 +44,6 @@ var GridDA = function() {
 								if(err) {
 									reject(err);
 								} else {
-									self.gridCache.push(newGrid);
 									resolve(newGrid);
 								}
 							});		
@@ -61,27 +58,18 @@ var GridDA = function() {
 
 	var load = function(gridId) {
 		var self = this;
-		
 		return new Promise(function(resolve, reject) {
-			var cachedGrid = self.gridCache.find(function(aGrid) {
-				return aGrid.gridId === gridId;
+			gridModel.findOne({ gridId: gridId }).exec(function(err,doc) {
+				if(err) {
+					reject(err);
+					return;
+				}
+				if(doc) {
+					resolve(doc);
+				} else {
+					reject("No grid found with that id.");
+				}
 			});
-			if(cachedGrid) {
-				resolve(cachedGrid);
-			} else {
-				gridModel.findOne({ gridId: gridId }).exec(function(err,doc) {
-					if(err) {
-						reject(err);
-						return;
-					}
-					if(doc) {
-						self.gridCache.push(doc);
-						resolve(doc);
-					} else {
-						reject("No grid found with that id.");
-					}
-				});
-			}
 		});
 	};
 
@@ -94,9 +82,6 @@ var GridDA = function() {
 					reject(err);
 					return;
 				} 
-				docs.forEach(function(doc) {
-					self.gridCache.push(doc);
-				});
 				resolve(docs);
 			});
 		});
@@ -105,8 +90,7 @@ var GridDA = function() {
 	return {
 		save: save,
 		load: load,
-		loadMultiple: loadMultiple,
-		gridCache: gridCache
+		loadMultiple: loadMultiple
 	}
 }
 

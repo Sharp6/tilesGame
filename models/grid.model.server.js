@@ -1,12 +1,11 @@
 var Tile = require("./tile.model.server");
-/*
-var GridDA = require("./../da/grid.da.server");
-var gridDA = new GridDA();
-*/
+
 var daFactory = require('../da/daFactory.da.server');
+var repoFactory = require('../repositories/repositoryFactory.repository.server');
 var uuid = require("uuid");
 
 var Grid = function() {
+
 	var tiles = new Array();
 	var moves = new Array();
 	var emptyTile;
@@ -33,7 +32,7 @@ var Grid = function() {
 		tile.rowPos = this.emptyTile.rowPos;
 		this.emptyTile.rowPos = tempRowPos;
 
-		var tempColPos = tile.colPos();
+		var tempColPos = tile.colPos;
 		tile.colPos = this.emptyTile.colPos;
 		this.emptyTile.colPos = tempColPos;
 
@@ -112,13 +111,14 @@ var Grid = function() {
 				self.rowDim = gridData.rowDim;
 				self.colDim = gridData.colDim;
 				var promises = gridData.tileIds.map(function(tileId) {
-					var tile = new Tile();
-					self.tiles.push(tile);
-					return tile.load(tileId);
+					return repoFactory.tile.load(tileId);
 				});
 				return Promise.all(promises);
 			})
-			.then(function(tiles) {
+			.then(function(loadedTiles) {
+				loadedTiles.forEach(function(loadedTile) {
+					self.tiles.push(loadedTile);
+				});
 				self.emptyTile = self.tiles.find(function(aTile) {
 					return aTile.empty;
 				});
@@ -133,10 +133,12 @@ var Grid = function() {
 		rowDim: rowDim,
 		colDim: colDim,
 		isLegalMove: isLegalMove,
+		moves: moves,
 		move: move,
 		init: init,
 		save: save,
-		load: load
+		load: load,
+		execute: execute
 	}
 }
 

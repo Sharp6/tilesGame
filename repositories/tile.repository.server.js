@@ -7,23 +7,24 @@ var TileRepository = function() {
 
 	var getTile = function(tileId) {
 		var self = this;
-		
-		return new Promise(function(resolve,reject) {
-			var tile = tiles.find(function(aTile) {
-				return aTile.tileId === tileId;
-			});
-			if(tile) {
-				resolve(tile);
-			} else {
-				var newTile = new Tile();
-				self.tiles.push(newTile);
-				return newTile.load(tileId);
-			}	
+
+		var tile = tiles.find(function(aTile) {
+			return aTile.tileId === tileId;
 		});
+		if(tile) {
+			return new Promise(function(resolve,reject) {
+				resolve(tile);
+			});
+		} else {
+			var newTile = new Tile();
+			self.tiles.push(newTile);
+			return newTile.load(tileId);
+		}	
 	}
 
 	return {
-		getTile: getTile
+		load: getTile,
+		tiles: tiles
 	}
 }
 

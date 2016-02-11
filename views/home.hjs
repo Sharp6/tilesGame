@@ -11,6 +11,7 @@
 		<thead>
 			<td>Grid ID</td>
 			<td>Dimensions</td>
+			<td>Tiles</td>
 			<td>State</td>
 			<td>Initial state</td>
 			<td>Goal state</td>
@@ -23,6 +24,13 @@
 					</td>
 					<td>
 						{{rowDim}} x {{colDim}}
+					</td>
+					<td>
+						<ul>
+							{{#tiles}}
+								<li>{{label}}: {{tileId}}
+							{{/tiles}}
+						</ul>
 					</td>
 					<td>
 						<div class="grid-container">

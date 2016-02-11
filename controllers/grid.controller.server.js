@@ -28,7 +28,8 @@ var GridController = function() {
 	}
 
 	var getGrid = function(req,res) {
-		loadGrid(req.gridId)
+		console.log("Getting grid in gridcontroller.");
+		loadGrid(req.params.gridId)
 			.then(function(grid) {
 				res.json(grid);
 			})
@@ -39,10 +40,7 @@ var GridController = function() {
 	}
 
 	var loadGrid = function(gridId) {
-		return repoFactory.grid.load(gridId)
-			.then(function(grid) {
-				
-			})
+		return repoFactory.grid.load(gridId);
 	}
 
 	var createGrid = function(req,res) {
@@ -52,15 +50,44 @@ var GridController = function() {
 	}
 
 	var doMove = function(req,res) {
-		// load grid
-
-		// 
+		loadGrid(req.params.gridId)
+			.then(function(grid) {
+				var tileToMove = grid.tiles.find(function(aTile) {
+					return aTile.tileId === req.params.tileId;
+				});
+				if(tileToMove) {
+					if(grid.isLegalMove(tileToMove)) {
+						grid.execute("move", tileToMove);
+						res.send("Tile has been moved");
+						return grid;
+					} else {
+						res.send("Tile is not in a movable position.");
+						return false;
+					}
+				} else {
+					console.log("ERROR: tile not found");
+					res.status(500).send("Tile not found");
+					return false;
+				}
+			})
+			.then(function(grid) {
+				if(grid) {
+					grid.save();
+				}
+			})
+			.catch(function(err) {
+				console.log(err);
+				res.status(500).send(err);
+			});
 	}
 
 	return {
 		getGrids: getGrids,
 		loadGrids: loadGrids,
-		createGrid: createGrid
+		createGrid: createGrid,
+		getGrid: getGrid,
+		loadGrid: loadGrid,
+		doMove: doMove
 	}
 }
 
