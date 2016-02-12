@@ -1,5 +1,8 @@
-var daFactory = require("../da/daFactory.da.server");
 var repoFactory = require("../repositories/repositoryFactory.repository.server");
+var commandFactory = require("../commands/commandFactory.command.server");
+
+// These two should not be needed here, a repo should hand back all objects.
+var daFactory = require("../da/daFactory.da.server");
 var Grid = require("../models/grid.model.server");
 
 var GridController = function() {
@@ -29,7 +32,7 @@ var GridController = function() {
 
 	var getGrid = function(req,res) {
 		console.log("Getting grid in gridcontroller.");
-		loadGrid(req.params.gridId)
+		repoFactory.grid.load(req.params.gridId)
 			.then(function(grid) {
 				res.json(grid);
 			})
@@ -39,9 +42,11 @@ var GridController = function() {
 			});
 	}
 
+	/*
 	var loadGrid = function(gridId) {
 		return repoFactory.grid.load(gridId);
 	}
+	*/
 
 	var createGrid = function(req,res) {
 		var grid = new Grid();
@@ -53,42 +58,65 @@ var GridController = function() {
 		// This function checks too much. It should only check if the grid and tile can be loaded, not whether the tile is in a moveable position.
 		// It should then create a MOVE COMMAND, but I don't think the grid model should do that. Rather, a command should be a separate object with a reference to the grid, the tile, and an execute method.
 		// This means that a grid does not have a reference to its commands? (otherwise: circular references.)
-		loadGrid(req.params.gridId)
+		repoFactory.grid.load(req.params.gridId)
 			.then(function(grid) {
-				var tileToMove = grid.tiles.find(function(aTile) {
-					return aTile.tileId === req.params.tileId;
+				return new Promise(function(resolve, reject) {
+					req.grid = grid;
+					resolve(req);
 				});
-				if(tileToMove) {
-
-					// Here, a transition to the domain should be made
-					if(grid.isLegalMove(tileToMove)) {
-						grid.execute("move", tileToMove);
-						var answer = {
-							resultStatus: 'success',
-							grid: grid
-						}
-						res.send(answer);
-						return grid;
+			})
+			.then(function(req) {
+				console.log("Gridcontroller: Searching tile");
+				return new Promise(function(resolve, reject) {
+					var tileToMove = req.grid.tiles.find(function(aTile) {
+						return aTile.tileId === req.params.tileId;
+					});
+					if(tileToMove) {
+						req.tileToMove = tileToMove;
+						resolve(req);
 					} else {
-						var answer = {
-							resultStatus: "Tile is not in a movable position.",
-							grid: grid
-						}
-						res.send(answer);
-						return false;
+						reject("Unable to find tile in grid.");
 					}
-				// Below is the responsibility of the controller.
-				} else {
-					console.log("ERROR: tile not found");
-					res.status(500).send("Tile not found");
-					return false;
-				}
+				});
+			})
+			.then(function(req) {
+				console.log("Gridcontroller: Making command.");
+				return new Promise(function(resolve,reject) {
+					req.command = repoFactory.command.getNewMoveCommand(req.grid, req.tileToMove);
+					// Here, a transition to the domain should be made
+					// A commandfactory should be asked to create a move command
+					// commandFactory.getCommand("move", grid, tile)
+					resolve(req);
+				});
+			})
+			.then(function(req) {
+				console.log("Gridcontroller: Executing command.");
+				return new Promise(function(resolve, reject) {
+					req.resultStatus = req.command.execute();
+					resolve(req);
+				});
+			})
+			.then(function(req) {
+				console.log("Gridcontroller: Constructing answer.");
+				return new Promise(function(resolve,reject) {
+					req.answer = {
+						resultStatus: req.resultStatus,
+						grid: req.grid
+					};
+					resolve(req);
+				});
+			})
+			.then(function(req) {
+				console.log("Gridcontroller:Sensing answer.");
+				return new Promise(function(resolve,reject) {
+					res.send(req.answer);
+					resolve(req);
+				});
 			})
 			// I don't think the grid should be saved here, the domain should handle that
-			.then(function(grid) {
-				if(grid) {
-					grid.save();
-				}
+			.then(function(req) {
+				console.log("Gridcontroller: Saving grid.");
+				req.grid.save();
 			})
 			.catch(function(err) {
 				console.log(err);
@@ -101,7 +129,6 @@ var GridController = function() {
 		loadGrids: loadGrids,
 		createGrid: createGrid,
 		getGrid: getGrid,
-		loadGrid: loadGrid,
 		doMove: doMove
 	}
 }

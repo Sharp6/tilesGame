@@ -7,24 +7,42 @@ var Command = function() {
 	var name;
 	var tile;
 	var grid;
+	var timestamp;
+
+	var execute = function() {
+		console.log("Executing command.");
+		if(this.grid.isLegalMove(this.tile)) {
+			console.log("Move command: move is found to be legal.")
+			if(this.grid.move(this.tile)) {
+				return "Move complete.";
+			} else {
+				return "Move could not be completed.";
+			}
+		} else {
+			return "Tile is not in a movable position.";
+		}
+	}
 
 	var init = function(data) {
 		this.commandId = uuid.v1();
+		this.timestamp = Date.now();
+		this.name = "move";
 
-		this.name = data.name;
 		this.tile = data.tile;
-		this.gridId = data.gridId;
+		this.grid = data.grid;
+
+		return;
 	}
 
 	var load = function(id) {
 		var self = this;
+		// shouldn't we have a command-reposiorty?
 		return daFactory.command.load(id)
 			.then(function(commandData) {
 				self.commandId = commandData.commandId;
 				self.name = commandData.name;
-				self.gridId = commandData.gridId;
-				// TODO: load tile
-
+				// TODO: load grid through gridRepository
+				// TODO: load tile through tileRepository or through grid?
 				return self;
 			});
 	}
@@ -38,10 +56,11 @@ var Command = function() {
 		commandId: commandId,
 		name: name,
 		tile: tile,
-		gridId: gridId,
+		grid: grid,
 		init: init,
 		save: save,
-		load: load
+		load: load,
+		execute: execute
 	}
 }
 

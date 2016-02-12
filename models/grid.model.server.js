@@ -15,6 +15,8 @@ var Grid = function() {
 	var colDim;
 
 	var isLegalMove = function(tile) {
+		console.log("Grid model: cheching legality of move");
+		//console.log("Tile", tile);
 		return ((Math.abs(tile.rowPos - this.emptyTile.rowPos) == 1) 
 					&& (Math.abs(tile.colPos - this.emptyTile.colPos) == 0)) 
 				|| ((Math.abs(tile.rowPos - this.emptyTile.rowPos) == 0) 
@@ -81,6 +83,7 @@ var Grid = function() {
 		this.save();
 	}
 
+	/*
 	var execute = function(name) {
 		var args = Array.prototype.slice.call(arguments,1);
 		if(name === "move") {
@@ -98,6 +101,7 @@ var Grid = function() {
 		}
 		return false;
 	}
+	*/
 
 	var save = function() {
 		return daFactory.grid.save(this);
@@ -137,8 +141,8 @@ var Grid = function() {
 		move: move,
 		init: init,
 		save: save,
-		load: load,
-		execute: execute
+		load: load
+		
 	}
 }
 

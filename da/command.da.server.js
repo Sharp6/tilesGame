@@ -14,14 +14,14 @@ var CommandDA = function() {
 	var self = this;
 
 	var save = function(command) {
-		console.log("In DA");
+		console.log("Command DA: saving command.");
 		return new Promise(function(resolve,reject) {
 			var newMove = new MoveCommandModel();
 			
 			newMove.name = command.name;
 			newMove.commandId = command.commandId;
 			newMove.tileId = command.tile.tileId;
-			newMove.gridId = command.gridId;
+			newMove.gridId = command.grid.gridId;
 
 			console.log("This should save to DB.");
 			newMove.save(function(err) {
