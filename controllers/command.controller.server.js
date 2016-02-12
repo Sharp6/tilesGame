@@ -1,3 +1,5 @@
+// I don't think I need a command controller. 
+
 var Tile = require("../models/tile.model.server");
 var Grid = require("../models/grid.model.server");
 

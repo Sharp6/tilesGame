@@ -50,12 +50,17 @@ var GridController = function() {
 	}
 
 	var doMove = function(req,res) {
+		// This function checks too much. It should only check if the grid and tile can be loaded, not whether the tile is in a moveable position.
+		// It should then create a MOVE COMMAND, but I don't think the grid model should do that. Rather, a command should be a separate object with a reference to the grid, the tile, and an execute method.
+		// This means that a grid does not have a reference to its commands? (otherwise: circular references.)
 		loadGrid(req.params.gridId)
 			.then(function(grid) {
 				var tileToMove = grid.tiles.find(function(aTile) {
 					return aTile.tileId === req.params.tileId;
 				});
 				if(tileToMove) {
+
+					// Here, a transition to the domain should be made
 					if(grid.isLegalMove(tileToMove)) {
 						grid.execute("move", tileToMove);
 						var answer = {
@@ -72,12 +77,14 @@ var GridController = function() {
 						res.send(answer);
 						return false;
 					}
+				// Below is the responsibility of the controller.
 				} else {
 					console.log("ERROR: tile not found");
 					res.status(500).send("Tile not found");
 					return false;
 				}
 			})
+			// I don't think the grid should be saved here, the domain should handle that
 			.then(function(grid) {
 				if(grid) {
 					grid.save();
